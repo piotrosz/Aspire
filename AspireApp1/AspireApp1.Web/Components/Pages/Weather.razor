@@ -37,6 +37,8 @@ else
             }
         </tbody>
     </table>
+
+    <p>Data generated at: @forecasts?.FirstOrDefault()?.GeneratedAt.ToString("g")</p>
 }
 
 @code {
