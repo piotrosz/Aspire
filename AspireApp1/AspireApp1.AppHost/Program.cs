@@ -1,6 +1,8 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var cache = builder.AddRedis("cache")
+var cache = builder
+    .AddRedis("cache")
+    .WithRedisInsight()
     .WithLifetime(ContainerLifetime.Persistent)
     .WithDataVolume()
     .WithPersistence();

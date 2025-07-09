@@ -1,17 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using StackExchange.Redis;
 using System.Text.Json;
+using Microsoft.Extensions.Caching.Distributed;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add service defaults & Aspire client integrations.
 builder.AddServiceDefaults();
-
-// Add services to the container.
 builder.Services.AddProblemDetails();
 
-// Add Redis connection from Aspire components
-builder.AddRedisClient("cache");
+builder.AddRedisDistributedCache(connectionName: "cache");
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -28,21 +25,16 @@ if (app.Environment.IsDevelopment())
 
 string[] summaries = ["Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"];
 
-app.MapGet("/weatherforecast", async ([FromServices] IConnectionMultiplexer redis) =>
+app.MapGet("/weatherforecast", async ([FromServices] IDistributedCache distributedCache) =>
 {
     var cacheKey = "weatherforecast";
-    var db = redis.GetDatabase();
+    var cachedData = await distributedCache.GetStringAsync(cacheKey);
     
-    // Try to get data from cache
-    var cachedData = await db.StringGetAsync(cacheKey);
-    
-    if (cachedData.HasValue)
+    if (cachedData is not null)
     {
-        // Return cached data if it exists
         return JsonSerializer.Deserialize<WeatherForecast[]>(cachedData!)!;
     }
     
-    // Generate new forecast if not in cache
     var forecast = Enumerable.Range(1, 5).Select(index =>
         new WeatherForecast
         (
@@ -53,12 +45,13 @@ app.MapGet("/weatherforecast", async ([FromServices] IConnectionMultiplexer redi
         ))
         .ToArray();
         
-    // Save to cache with expiration of 1 minute
-    await db.StringSetAsync(
+    await distributedCache.SetStringAsync(
         cacheKey,
         JsonSerializer.Serialize(forecast),
-        TimeSpan.FromMinutes(1)
-    );
+        new DistributedCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1)
+        });
     
     return forecast;
 })
