@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using StackExchange.Redis;
 using System.Text.Json;
+using AspireApp1.ApiService;
 using Microsoft.Extensions.Caching.Distributed;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,39 +23,29 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-string[] summaries = ["Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"];
-
-app.MapGet("/weatherforecast", async ([FromServices] IDistributedCache distributedCache) =>
+app.MapGet("/books", async ([FromServices] IDistributedCache distributedCache) =>
 {
-    var cacheKey = "weatherforecast";
+    const string cacheKey = "books";
     var cachedData = await distributedCache.GetStringAsync(cacheKey);
     
     if (cachedData is not null)
     {
-        return JsonSerializer.Deserialize<WeatherForecast[]>(cachedData!)!;
+        return JsonSerializer.Deserialize<List<Book>>(cachedData);
     }
-    
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)],
-            DateTime.Now
-        ))
-        .ToArray();
+
+    var books = BooksDataSource.GetBooks();
         
     await distributedCache.SetStringAsync(
         cacheKey,
-        JsonSerializer.Serialize(forecast),
+        JsonSerializer.Serialize(books),
         new DistributedCacheEntryOptions
         {
             AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1)
         });
     
-    return forecast;
+    return books;
 })
-.WithName("GetWeatherForecast");
+.WithName("GetBooks");
 
 app.MapDefaultEndpoints();
 
