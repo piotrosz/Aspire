@@ -23,9 +23,10 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+const string cacheKey = "books";
+
 app.MapGet("/books", async ([FromServices] IDistributedCache distributedCache) =>
 {
-    const string cacheKey = "books";
     var cachedData = await distributedCache.GetStringAsync(cacheKey);
     
     if (cachedData is not null)
@@ -40,12 +41,19 @@ app.MapGet("/books", async ([FromServices] IDistributedCache distributedCache) =
         JsonSerializer.Serialize(books),
         new DistributedCacheEntryOptions
         {
-            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1)
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1),
+            
         });
     
     return books;
 })
 .WithName("GetBooks");
+
+app.MapPut("/books/invalidate", async ([FromServices] IDistributedCache distributedCache) =>
+{
+    await distributedCache.RefreshAsync(cacheKey);
+})
+    .WithName("Invalidate");
 
 app.MapDefaultEndpoints();
 
