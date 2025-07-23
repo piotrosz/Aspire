@@ -44,7 +44,16 @@ else
                                 break;
                         }
                     </td>
-                    <td>@book.Own</td>
+                    <td>
+                        @if (book.Own)
+                        {
+                            <i class="bi bi-check-lg text-danger" title="I own this book"></i>
+                        }
+                        else
+                        {
+                            <i class="bi bi-x-lg text-muted" title="I don't own this book"></i>
+                        }
+                    </td>
                     <td>
                         @if (book.Fiction)
                         {
