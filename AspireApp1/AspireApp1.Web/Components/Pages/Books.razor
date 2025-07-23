@@ -21,6 +21,7 @@ else
                 <th>Author</th>
                 <th>Status</th>
                 <th>Own</th>
+                <th>Fiction</th>
             </tr>
         </thead>
         <tbody>
@@ -29,8 +30,31 @@ else
                 <tr>
                     <td>@book.Title</td>
                     <td>@book.Author</td>
-                    <td>@book.Status.ToString()</td>
+                    <td>
+                        @switch (book.Status)
+                        {
+                            case ReadStatus.NotRead:
+                                <i class="bi bi-circle text-danger" title="Not Read"></i>
+                                break;
+                            case ReadStatus.Reading:
+                                <i class="bi bi-arrow-clockwise text-warning" title="Currently Reading"></i>
+                                break;
+                            case ReadStatus.Read:
+                                <i class="bi bi-check-circle-fill text-success" title="Finished Reading"></i>
+                                break;
+                        }
+                    </td>
                     <td>@book.Own</td>
+                    <td>
+                        @if (book.Fiction)
+                        {
+                            <i class="bi bi-book text-primary" title="Fiction"></i>
+                        }
+                        else
+                        {
+                            <i class="bi bi-file-text text-secondary" title="Non-fiction"></i>
+                        }
+                    </td>
                 </tr>
             }
         </tbody>

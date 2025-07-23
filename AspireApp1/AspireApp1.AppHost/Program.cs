@@ -7,7 +7,8 @@ var cache = builder
     .WithDataVolume()
     .WithPersistence();
 
-var apiService = builder.AddProject<Projects.AspireApp1_ApiService>("apiservice")
+var apiService = builder
+    .AddProject<Projects.AspireApp1_ApiService>("apiservice")
     .WithReference(cache)
     .WaitFor(cache);
 
