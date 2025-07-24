@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.StackExchange.Redis.OutputCaching" Version="9.3.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="9.0.7" />
   </ItemGroup>
 
 </Project>
