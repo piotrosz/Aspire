@@ -10,13 +10,13 @@
 
 <h1>Books</h1>
 
-@if (books == null)
+@if (_books == null)
 {
     <p><em>Loading...</em></p>
 }
 else
 {
-    <QuickGrid Items="@books.AsQueryable()" Class="table table-striped">
+    <QuickGrid Items="@_books.AsQueryable()" Class="table table-striped">
         <PropertyColumn Property="@(b => b.Title)" Title="Title" Sortable="true" />
         <PropertyColumn Property="@(b => b.Author)" Title="Author" Sortable="true" />
         <TemplateColumn Title="Status" Sortable="true" SortBy="GridSort<Book>.ByAscending(b => b.Status)">
@@ -31,6 +31,8 @@ else
                 case ReadStatus.Read:
                     <i class="bi bi-book-fill text-success" title="Finished Reading"></i>
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         </TemplateColumn>
         <TemplateColumn Title="Own" Sortable="true" SortBy="GridSort<Book>.ByAscending(b => b.Own)">
@@ -57,10 +59,10 @@ else
 }
 
 @code {
-    private Book[]? books;
+    private Book[]? _books;
 
     protected override async Task OnInitializedAsync()
     {
-        books = await BooksApi.GetBooks();
+        _books = await BooksApi.GetBooks();
     }
 }
