@@ -22,7 +22,7 @@ public class BooksApiClient(HttpClient httpClient)
         return books?.ToArray() ?? [];
     }
 
-    public async Task InvalidateCacheAsync(CancellationToken cancellationToken = default)
+    public async Task InvalidateCache(CancellationToken cancellationToken = default)
     {
         var response = await httpClient.PutAsync("/books/invalidate", null, cancellationToken);
         response.EnsureSuccessStatusCode();

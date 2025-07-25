@@ -98,7 +98,7 @@ else
 
         try
         {
-            await BooksApi.InvalidateCacheAsync();
+            await BooksApi.InvalidateCache();
             
             // Reload the books after invalidating cache
             _books = await BooksApi.GetBooks();
