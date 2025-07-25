@@ -9,7 +9,21 @@
 
 <PageTitle>My books</PageTitle>
 
-<h1>Books</h1>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Books</h1>
+    <button class="btn btn-outline-secondary" @onclick="InvalidateCacheAsync" disabled="@_isInvalidating">
+        @if (_isInvalidating)
+        {
+            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            <span>Refreshing...</span>
+        }
+        else
+        {
+            <i class="bi bi-arrow-clockwise me-2"></i>
+            <span>Refresh Cache</span>
+        }
+    </button>
+</div>
 
 @if (_books == null)
 {
@@ -69,10 +83,36 @@ else
 @code {
     private Book[]? _books;
     private IQueryable<Book> _booksQueryable = Enumerable.Empty<Book>().AsQueryable();
+    private bool _isInvalidating = false;
 
     protected override async Task OnInitializedAsync()
     {
         _books = await BooksApi.GetBooks();
         _booksQueryable = _books.AsQueryable();
+    }
+
+    private async Task InvalidateCacheAsync()
+    {
+        _isInvalidating = true;
+        StateHasChanged();
+
+        try
+        {
+            await BooksApi.InvalidateCacheAsync();
+            
+            // Reload the books after invalidating cache
+            _books = await BooksApi.GetBooks();
+            _booksQueryable = _books.AsQueryable();
+        }
+        catch (Exception ex)
+        {
+            // In a real application, you'd want proper error handling/logging
+            Console.WriteLine($"Error invalidating cache: {ex.Message}");
+        }
+        finally
+        {
+            _isInvalidating = false;
+            StateHasChanged();
+        }
     }
 }

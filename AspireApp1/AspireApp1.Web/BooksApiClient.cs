@@ -21,6 +21,12 @@ public class BooksApiClient(HttpClient httpClient)
 
         return books?.ToArray() ?? [];
     }
+
+    public async Task InvalidateCacheAsync(CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.PutAsync("/books/invalidate", null, cancellationToken);
+        response.EnsureSuccessStatusCode();
+    }
 }
 
 public record Book(string Title, string Author, bool Own, ReadStatus Status, bool Fiction);
