@@ -1,6 +1,7 @@
 ﻿@page "/books"
-@attribute [StreamRendering(true)]
-@attribute [OutputCache(Duration = 5)]
+@rendermode InteractiveServer
+@* @attribute [StreamRendering(true)] *@
+@* @attribute [OutputCache(Duration = 5)] *@
 
 @using Microsoft.AspNetCore.Components.QuickGrid
 
@@ -16,43 +17,50 @@
 }
 else
 {
-    <QuickGrid Items="@_books.AsQueryable()" Class="table table-striped">
+    <QuickGrid Items="@_booksQueryable" Class="table table-striped">
         <PropertyColumn Property="@(b => b.Title)" Title="Title" Sortable="true" />
         <PropertyColumn Property="@(b => b.Author)" Title="Author" Sortable="true" />
-        <TemplateColumn Title="Status" Sortable="true" SortBy="GridSort<Book>.ByAscending(b => b.Status)">
+        <TemplateColumn Title="Status" Sortable="true" SortBy="GridSort<Book>.ByAscending(b => (int)b.Status)">
             @switch (context.Status)
             {
                 case ReadStatus.NotRead:
                     <i class="bi bi-book text-danger" title="Not Read"></i>
+                    <span class="ms-2">Not Read</span>
                     break;
                 case ReadStatus.Reading:
                     <i class="bi bi-book-half text-warning" title="Currently Reading"></i>
+                    <span class="ms-2">Reading</span>
                     break;
                 case ReadStatus.Read:
                     <i class="bi bi-book-fill text-success" title="Finished Reading"></i>
+                    <span class="ms-2">Read</span>
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
         </TemplateColumn>
-        <TemplateColumn Title="Own" Sortable="true" SortBy="GridSort<Book>.ByAscending(b => b.Own)">
+        <TemplateColumn Title="Own" Sortable="true" SortBy="GridSort<Book>.ByDescending(b => b.Own)">
             @if (context.Own)
             {
-                <i class="bi bi-check-lg text-danger" title="I own this book"></i>
+                <i class="bi bi-check-lg text-success" title="I own this book"></i>
+                <span class="ms-2">Yes</span>
             }
             else
             {
                 <i class="bi bi-x-lg text-muted" title="I don't own this book"></i>
+                <span class="ms-2">No</span>
             }
         </TemplateColumn>
-        <TemplateColumn Title="Fiction" Sortable="true" SortBy="GridSort<Book>.ByAscending(b => b.Fiction)">
+        <TemplateColumn Title="Fiction" Sortable="true" SortBy="GridSort<Book>.ByDescending(b => b.Fiction)">
             @if (context.Fiction)
             {
                 <i class="bi bi-book text-primary" title="Fiction"></i>
+                <span class="ms-2">Fiction</span>
             }
             else
             {
                 <i class="bi bi-file-text text-secondary" title="Non-fiction"></i>
+                <span class="ms-2">Non-fiction</span>
             }
         </TemplateColumn>
     </QuickGrid>
@@ -60,9 +68,11 @@ else
 
 @code {
     private Book[]? _books;
+    private IQueryable<Book> _booksQueryable = Enumerable.Empty<Book>().AsQueryable();
 
     protected override async Task OnInitializedAsync()
     {
         _books = await BooksApi.GetBooks();
+        _booksQueryable = _books.AsQueryable();
     }
 }

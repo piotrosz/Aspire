@@ -6,10 +6,9 @@ public static class BooksDataSource
     {
         return
         [
-            new Book("Lektura uproszczona", "Cristina Morales", false, ReadStatus.Reading, true), 
+            new Book("Lektura uproszczona", "Cristina Morales", false, ReadStatus.Reading, true),
             new Book("Revolusi. Indonezja i narodziny nowoczesnego świata", "David van Reybrouck", true, ReadStatus.Read, false),
             new Book("Kandydat", "Jakub Żulczyk", false, ReadStatus.Reading, true),
-
         ];
     }
 }
